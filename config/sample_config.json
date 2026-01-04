@@ -1,0 +1,54 @@
+{
+  "capture": {
+    "source": "image",
+    "path": "sample_images/hmi_screen.png"
+  },
+  "regions": {
+    "temperature": {
+      "x": 40,
+      "y": 130,
+      "w": 95,
+      "h": 40,
+      "type": "number"
+    },
+    "pressure": {
+      "x": 40,
+      "y": 230,
+      "w": 80,
+      "h": 40,
+      "type": "number"
+    },
+    "flow_rate": {
+      "x": 40,
+      "y": 330,
+      "w": 105,
+      "h": 40,
+      "type": "number"
+    },
+    "status": {
+      "x": 340,
+      "y": 145,
+      "w": 140,
+      "h": 40,
+      "type": "text"
+    },
+    "alarms": {
+      "x": 340,
+      "y": 270,
+      "w": 90,
+      "h": 40,
+      "type": "text"
+    },
+    "units_produced": {
+      "x": 340,
+      "y": 385,
+      "w": 85,
+      "h": 40,
+      "type": "number"
+    }
+  },
+  "output": {
+    "type": "csv",
+    "path": "output/readings.csv"
+  }
+}

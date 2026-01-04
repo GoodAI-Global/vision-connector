@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vision-connector"
+version = "0.1.0"
+description = "Non-invasive industrial data capture using computer vision - by Good AI"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Good AI", email = "engineering@goodai.com"}
+]
+keywords = [
+    "industrial",
+    "computer-vision",
+    "ocr",
+    "hmi",
+    "gauge-reading",
+    "non-invasive",
+    "data-capture",
+    "manufacturing"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Manufacturing",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+]
+dependencies = [
+    "opencv-python-headless>=4.5.0",
+    "pytesseract>=0.3.10",
+    "numpy>=1.20.0",
+    "Pillow>=9.0.0",
+    "paho-mqtt>=1.6.0",
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+]
+gui = [
+    "opencv-python>=4.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/goodai/vision-connector"
+Documentation = "https://github.com/goodai/vision-connector#readme"
+Repository = "https://github.com/goodai/vision-connector.git"
+Issues = "https://github.com/goodai/vision-connector/issues"
+
+[project.scripts]
+vision-connector = "vision_connector.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
