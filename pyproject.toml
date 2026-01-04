@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    {name = "Good AI", email = "engineering@goodai.com"}
+    {name = "rogermsc", email = "rogermsc@gmail.com"}
 ]
 keywords = [
     "industrial",
@@ -62,9 +62,6 @@ Homepage = "https://github.com/goodai/vision-connector"
 Documentation = "https://github.com/goodai/vision-connector#readme"
 Repository = "https://github.com/goodai/vision-connector.git"
 Issues = "https://github.com/goodai/vision-connector/issues"
-
-[project.scripts]
-vision-connector = "vision_connector.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

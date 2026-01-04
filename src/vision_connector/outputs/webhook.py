@@ -7,8 +7,9 @@ Works headless - no display required.
 
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import requests
 
@@ -17,12 +18,14 @@ class WebhookOutput:
     """
     Webhook output for sending extracted data to HTTP endpoints.
 
-    Supports authentication, custom headers, retries, and batching.
+    Supports authentication, custom headers, retries, SSL verification, and batching.
 
     Example:
         >>> webhook = WebhookOutput("https://api.example.com/readings")
         >>> webhook.send({"temperature": 185.5, "pressure": 42.3})
     """
+
+    ALLOWED_SCHEMES = {"http", "https"}
 
     def __init__(
         self,
@@ -35,12 +38,13 @@ class WebhookOutput:
         timeout: float = 30.0,
         retries: int = 3,
         retry_delay: float = 1.0,
+        verify_ssl: bool = True,
     ):
         """
         Initialize webhook output.
 
         Args:
-            url: Target webhook URL.
+            url: Target webhook URL (must be http or https).
             method: HTTP method (POST, PUT, PATCH).
             headers: Optional custom headers.
             auth: Optional (username, password) tuple for basic auth.
@@ -49,12 +53,14 @@ class WebhookOutput:
             timeout: Request timeout in seconds.
             retries: Number of retry attempts on failure.
             retry_delay: Delay between retries in seconds.
+            verify_ssl: Verify SSL certificates (default True, set False for testing only).
         """
-        self.url = url
-        self.method = method.upper()
+        self.url = self._validate_url(url)
+        self.method = self._validate_method(method)
         self.timeout = timeout
         self.retries = retries
         self.retry_delay = retry_delay
+        self.verify_ssl = verify_ssl
 
         # Build headers
         self.headers = {
@@ -72,8 +78,34 @@ class WebhookOutput:
         # Session for connection pooling
         self.session = requests.Session()
         self.session.headers.update(self.headers)
+        self.session.verify = verify_ssl
         if auth:
             self.session.auth = auth
+
+    def _validate_url(self, url: str) -> str:
+        """Validate URL format and scheme."""
+        parsed = urlparse(url)
+
+        if not parsed.scheme:
+            raise ValueError(f"Invalid URL: missing scheme (http/https): {url}")
+
+        if parsed.scheme.lower() not in self.ALLOWED_SCHEMES:
+            raise ValueError(
+                f"Invalid URL scheme: {parsed.scheme}. "
+                f"Allowed: {', '.join(self.ALLOWED_SCHEMES)}"
+            )
+
+        if not parsed.netloc:
+            raise ValueError(f"Invalid URL: missing host: {url}")
+
+        return url
+
+    def _validate_method(self, method: str) -> str:
+        """Validate HTTP method."""
+        method = method.upper()
+        if method not in ("POST", "PUT", "PATCH"):
+            raise ValueError(f"Unsupported HTTP method: {method}. Use POST, PUT, or PATCH.")
+        return method
 
     def send(
         self,
@@ -96,7 +128,7 @@ class WebhookOutput:
         # Prepare payload
         payload = dict(data)
         if add_timestamp:
-            payload["timestamp"] = datetime.utcnow().isoformat() + "Z"
+            payload["timestamp"] = datetime.now(timezone.utc).isoformat()
 
         # Attempt with retries
         last_error = None
@@ -121,8 +153,6 @@ class WebhookOutput:
                         json=payload,
                         timeout=self.timeout,
                     )
-                else:
-                    raise ValueError(f"Unsupported HTTP method: {self.method}")
 
                 # Return result
                 return {
@@ -160,7 +190,7 @@ class WebhookOutput:
         payload = {
             batch_key: readings,
             "count": len(readings),
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         return self.send(payload, add_timestamp=False)

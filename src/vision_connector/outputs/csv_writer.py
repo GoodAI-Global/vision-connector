@@ -182,12 +182,13 @@ class CSVWriter:
         return rows
 
     def get_row_count(self) -> int:
-        """Get the number of data rows in the file."""
+        """Get the number of data rows in the file (excluding header)."""
         if not self.filepath.exists():
             return 0
 
         with open(self.filepath, "r", newline="") as f:
-            return sum(1 for _ in f) - 1  # Subtract header row
+            count = sum(1 for _ in f) - 1  # Subtract header row
+            return max(0, count)  # Never return negative
 
     def clear(self) -> None:
         """Clear the CSV file (remove all data but keep headers)."""
