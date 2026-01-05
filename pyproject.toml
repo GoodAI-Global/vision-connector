@@ -56,6 +56,17 @@ dev = [
 gui = [
     "opencv-python>=4.5.0",
 ]
+metrics = [
+    "prometheus-client>=0.17.0",
+]
+config = [
+    "pyyaml>=6.0",
+]
+all = [
+    "prometheus-client>=0.17.0",
+    "opencv-python>=4.5.0",
+    "pyyaml>=6.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/goodai/vision-connector"

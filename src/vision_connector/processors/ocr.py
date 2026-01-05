@@ -13,12 +13,16 @@ import numpy as np
 import pytesseract
 from PIL import Image
 
+from vision_connector.logging import get_logger
 from vision_connector.utils.image_utils import (
     load_image,
     crop_region,
     preprocess_for_ocr,
     detect_text_color_scheme,
 )
+
+# Module logger
+_logger = get_logger(__name__)
 
 
 class OCRProcessor:
@@ -54,8 +58,11 @@ class OCRProcessor:
             lang: Tesseract language code (default: "eng").
             default_config: Default Tesseract config string.
         """
+        _logger.debug("Initializing OCRProcessor", lang=lang)
+
         if tesseract_cmd:
             pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+            _logger.debug("Using custom tesseract path", path=tesseract_cmd)
 
         self.lang = lang
         self.default_config = default_config
@@ -63,12 +70,20 @@ class OCRProcessor:
         # Verify Tesseract is available
         self._verify_tesseract()
 
+        _logger.info(
+            "OCRProcessor initialized",
+            tesseract_version=self._tesseract_version,
+            lang=self.lang,
+        )
+
     def _verify_tesseract(self) -> None:
         """Verify that Tesseract is installed and accessible."""
         try:
             version = pytesseract.get_tesseract_version()
             self._tesseract_version = str(version)
+            _logger.debug("Tesseract verified", version=self._tesseract_version)
         except Exception as e:
+            _logger.error("Tesseract OCR not found", error=str(e))
             raise RuntimeError(
                 f"Tesseract OCR not found. Please install Tesseract:\n"
                 f"  Ubuntu/Debian: sudo apt-get install tesseract-ocr\n"
@@ -98,28 +113,35 @@ class OCRProcessor:
         Returns:
             Extracted text string, stripped of leading/trailing whitespace.
         """
-        img = load_image(image)
+        with _logger.operation("extract_text"):
+            img = load_image(image)
 
-        # Crop to region if specified
-        if region:
-            img = crop_region(img, region)
+            # Crop to region if specified
+            if region:
+                img = crop_region(img, region)
 
-        # Preprocess for OCR
-        if preprocess:
-            # Auto-detect if we need to invert
-            color_scheme = detect_text_color_scheme(img)
-            invert = color_scheme == "light_on_dark"
-            img = preprocess_for_ocr(img, invert=invert)
+            # Preprocess for OCR
+            if preprocess:
+                # Auto-detect if we need to invert
+                color_scheme = detect_text_color_scheme(img)
+                invert = color_scheme == "light_on_dark"
+                img = preprocess_for_ocr(img, invert=invert)
 
-        # Build Tesseract config
-        config = f"{self.default_config} --psm {psm}"
-        if whitelist:
-            config += f" -c tessedit_char_whitelist={whitelist}"
+            # Build Tesseract config
+            config = f"{self.default_config} --psm {psm}"
+            if whitelist:
+                config += f" -c tessedit_char_whitelist={whitelist}"
 
-        # Run OCR
-        text = pytesseract.image_to_string(img, lang=self.lang, config=config)
+            # Run OCR
+            text = pytesseract.image_to_string(img, lang=self.lang, config=config)
 
-        return text.strip()
+            result = text.strip()
+            _logger.debug(
+                "Text extracted",
+                text_length=len(result),
+                has_region=region is not None,
+            )
+            return result
 
     def extract_numbers(
         self,

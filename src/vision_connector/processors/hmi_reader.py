@@ -14,8 +14,12 @@ from typing import Any, Dict, Optional, Union
 import numpy as np
 from PIL import Image
 
+from vision_connector.logging import get_logger, log_performance
 from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import load_image, crop_region
+
+# Module logger
+_logger = get_logger(__name__)
 
 
 class HMIReader:
@@ -58,6 +62,8 @@ class HMIReader:
             FileNotFoundError: If config file path doesn't exist.
             ValueError: If config is invalid.
         """
+        _logger.debug("Initializing HMIReader", tesseract_cmd=tesseract_cmd)
+
         self.ocr = OCRProcessor(tesseract_cmd=tesseract_cmd)
         self.config: Dict[str, Any] = {}
         self.default_regions: Dict[str, Dict] = {}
@@ -65,13 +71,22 @@ class HMIReader:
         if config:
             self._load_config(config)
 
+        _logger.info(
+            "HMIReader initialized",
+            regions_count=len(self.default_regions),
+        )
+
     def _load_config(self, config: Union[str, Path, Dict]) -> None:
         """Load configuration from file or dictionary."""
         if isinstance(config, dict):
+            _logger.debug("Loading config from dictionary")
             self.config = config
         else:
             config_path = Path(config)
+            _logger.debug("Loading config from file", path=str(config_path))
+
             if not config_path.exists():
+                _logger.error("Configuration file not found", path=str(config_path))
                 raise FileNotFoundError(
                     f"Configuration file not found: {config_path}\n"
                     f"Please provide a valid config file path or use regions parameter."
@@ -80,9 +95,15 @@ class HMIReader:
             with open(config_path, "r") as f:
                 self.config = json.load(f)
 
+            _logger.debug("Config loaded successfully", path=str(config_path))
+
         # Extract default regions from config
         if "regions" in self.config:
             self.default_regions = self.config["regions"]
+            _logger.debug(
+                "Regions extracted from config",
+                region_names=list(self.default_regions.keys()),
+            )
 
     def read_image(
         self,
@@ -104,37 +125,53 @@ class HMIReader:
         Raises:
             ValueError: If no regions are specified and no default config.
             FileNotFoundError: If image path doesn't exist.
-
-        Example:
-            >>> reader = HMIReader()
-            >>> result = reader.read_image("hmi.png", regions={
-            ...     "temp": {"x": 100, "y": 200, "w": 80, "h": 30, "type": "number"},
-            ...     "status": {"x": 300, "y": 100, "w": 100, "h": 40, "type": "text"}
-            ... })
         """
-        # Determine which regions to use
-        active_regions = regions if regions is not None else self.default_regions
+        with _logger.operation("read_image"):
+            # Determine which regions to use
+            active_regions = regions if regions is not None else self.default_regions
 
-        if not active_regions:
-            raise ValueError(
-                "No regions specified. Provide regions via:\n"
-                "  1. regions parameter: reader.read_image(img, regions={...})\n"
-                "  2. config file: HMIReader(config='config.json')\n"
-                "  3. config dict: HMIReader(config={'regions': {...}})\n\n"
-                "Region format: {'field_name': {'x': 0, 'y': 0, 'w': 100, 'h': 50}}"
+            if not active_regions:
+                _logger.error("No regions specified for reading")
+                raise ValueError(
+                    "No regions specified. Provide regions via:\n"
+                    "  1. regions parameter: reader.read_image(img, regions={...})\n"
+                    "  2. config file: HMIReader(config='config.json')\n"
+                    "  3. config dict: HMIReader(config={'regions': {...}})\n\n"
+                    "Region format: {'field_name': {'x': 0, 'y': 0, 'w': 100, 'h': 50}}"
+                )
+
+            # Log image source
+            image_source = str(image) if isinstance(image, (str, Path)) else type(image).__name__
+            _logger.debug(
+                "Reading HMI image",
+                source=image_source,
+                regions_count=len(active_regions),
             )
 
-        # Load the image
-        img = load_image(image)
+            # Load the image
+            img = load_image(image)
+            _logger.debug("Image loaded", shape=img.shape)
 
-        # Extract values from each region
-        results: Dict[str, str] = {}
+            # Extract values from each region
+            results: Dict[str, str] = {}
 
-        for field_name, region_config in active_regions.items():
-            value = self._extract_region_value(img, region_config)
-            results[field_name] = value
+            for field_name, region_config in active_regions.items():
+                value = self._extract_region_value(img, region_config)
+                results[field_name] = value
+                _logger.debug(
+                    "Extracted region value",
+                    field=field_name,
+                    value=value,
+                    region=region_config,
+                )
 
-        return results
+            _logger.info(
+                "HMI image read complete",
+                fields_extracted=len(results),
+                field_names=list(results.keys()),
+            )
+
+            return results
 
     def _extract_region_value(
         self,
@@ -190,32 +227,46 @@ class HMIReader:
                 - confidence: OCR confidence (0-1)
                 - region: Region coordinates used
         """
-        active_regions = regions if regions is not None else self.default_regions
+        with _logger.operation("read_image_with_metadata"):
+            active_regions = regions if regions is not None else self.default_regions
 
-        if not active_regions:
-            raise ValueError("No regions specified.")
+            if not active_regions:
+                _logger.error("No regions specified")
+                raise ValueError("No regions specified.")
 
-        img = load_image(image)
-        results: Dict[str, Dict] = {}
+            img = load_image(image)
+            results: Dict[str, Dict] = {}
 
-        for field_name, region_config in active_regions.items():
-            region = {
-                "x": region_config["x"],
-                "y": region_config["y"],
-                "w": region_config["w"],
-                "h": region_config["h"],
-            }
+            for field_name, region_config in active_regions.items():
+                region = {
+                    "x": region_config["x"],
+                    "y": region_config["y"],
+                    "w": region_config["w"],
+                    "h": region_config["h"],
+                }
 
-            value = self._extract_region_value(img, region_config)
-            confidence = self.ocr.get_average_confidence(img, region=region)
+                value = self._extract_region_value(img, region_config)
+                confidence = self.ocr.get_average_confidence(img, region=region)
 
-            results[field_name] = {
-                "value": value,
-                "confidence": round(confidence, 3),
-                "region": region,
-            }
+                results[field_name] = {
+                    "value": value,
+                    "confidence": round(confidence, 3),
+                    "region": region,
+                }
 
-        return results
+                _logger.debug(
+                    "Extracted region with metadata",
+                    field=field_name,
+                    value=value,
+                    confidence=confidence,
+                )
+
+            _logger.info(
+                "HMI image read with metadata complete",
+                fields_extracted=len(results),
+            )
+
+            return results
 
     def select_roi_interactive(
         self,
@@ -236,10 +287,13 @@ class HMIReader:
         Raises:
             RuntimeError: If no display is available.
         """
+        _logger.debug("Starting interactive ROI selection")
+
         # Check for display availability
         display = os.environ.get("DISPLAY")
 
         if not display and os.name != "nt":  # Not Windows and no DISPLAY
+            _logger.error("No display available for interactive ROI selection")
             raise RuntimeError(
                 "No display available for interactive ROI selection.\n"
                 "In headless environments, specify ROI via:\n"
@@ -252,6 +306,7 @@ class HMIReader:
         try:
             import cv2
         except ImportError:
+            _logger.error("OpenCV not available for GUI operations")
             raise RuntimeError("OpenCV not available for GUI operations.")
 
         img = load_image(image)
@@ -266,9 +321,13 @@ class HMIReader:
         x, y, w, h = roi
 
         if w == 0 or h == 0:
+            _logger.warning("ROI selection cancelled or invalid")
             raise ValueError("No region selected (cancelled or invalid selection).")
 
-        return {"x": int(x), "y": int(y), "w": int(w), "h": int(h)}
+        result = {"x": int(x), "y": int(y), "w": int(w), "h": int(h)}
+        _logger.info("ROI selected", region=result)
+
+        return result
 
     @staticmethod
     def create_sample_config(output_path: Union[str, Path]) -> None:
@@ -278,6 +337,8 @@ class HMIReader:
         Args:
             output_path: Path where to write the sample config.
         """
+        _logger.debug("Creating sample config", path=str(output_path))
+
         sample_config = {
             "capture": {
                 "source": "image",
@@ -317,3 +378,5 @@ class HMIReader:
 
         with open(output_path, "w") as f:
             json.dump(sample_config, f, indent=2)
+
+        _logger.info("Sample config created", path=str(output_path))

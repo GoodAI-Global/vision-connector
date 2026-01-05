@@ -11,6 +11,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from vision_connector.logging import get_logger
+
+# Module logger
+_logger = get_logger(__name__)
+
 
 class CSVWriter:
     """
@@ -44,6 +49,11 @@ class CSVWriter:
             delimiter: CSV delimiter character.
             append_mode: If True, append to existing file. If False, overwrite.
         """
+        _logger.debug(
+            "Initializing CSVWriter",
+            filepath=str(filepath),
+            append_mode=append_mode,
+        )
         self.filepath = Path(filepath)
         self.fieldnames = fieldnames
         self.add_timestamp = add_timestamp
@@ -60,6 +70,12 @@ class CSVWriter:
         # Check for existing file
         if self.filepath.exists() and self.append_mode:
             self._read_existing_headers()
+
+        _logger.info(
+            "CSVWriter initialized",
+            filepath=str(self.filepath),
+            headers_written=self._headers_written,
+        )
 
     def _read_existing_headers(self) -> None:
         """Read headers from existing file."""
@@ -122,8 +138,10 @@ class CSVWriter:
             if not self._headers_written:
                 writer.writeheader()
                 self._headers_written = True
+                _logger.debug("CSV headers written", fields=self.fieldnames)
 
             writer.writerow(row_data)
+            _logger.debug("CSV row appended", fields=len(row_data))
 
     def append_batch(
         self,

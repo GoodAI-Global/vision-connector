@@ -12,7 +12,11 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from vision_connector.logging import get_logger
 from vision_connector.utils.image_utils import load_image, crop_region
+
+# Module logger
+_logger = get_logger(__name__)
 
 
 class GaugeReader:
@@ -49,8 +53,14 @@ class GaugeReader:
             max_angle: Angle (degrees) corresponding to maximum value.
                        Default: 315° (typical gauge maximum position).
         """
+        _logger.debug(
+            "Initializing GaugeReader",
+            min_angle=min_angle,
+            max_angle=max_angle,
+        )
         self.min_angle = min_angle
         self.max_angle = max_angle
+        _logger.info("GaugeReader initialized")
 
     def read_analog_gauge(
         self,
@@ -77,44 +87,53 @@ class GaugeReader:
                 - confidence: Confidence score (0-1)
                 - angle: Detected needle angle in degrees
         """
-        img = load_image(image)
+        with _logger.operation("read_analog_gauge"):
+            img = load_image(image)
 
-        if region:
-            img = crop_region(img, region)
+            if region:
+                img = crop_region(img, region)
 
-        # Find gauge center and radius
-        center, radius = self._find_gauge_circle(img)
+            # Find gauge center and radius
+            center, radius = self._find_gauge_circle(img)
 
-        if center is None:
-            return {
-                "value": None,
+            if center is None:
+                _logger.warning("Could not detect gauge circle")
+                return {
+                    "value": None,
+                    "unit": unit,
+                    "confidence": 0.0,
+                    "angle": None,
+                    "error": "Could not detect gauge circle",
+                }
+
+            # Detect needle angle
+            angle, confidence = self._detect_needle_angle(img, center, radius)
+
+            if angle is None:
+                _logger.warning("Could not detect needle")
+                return {
+                    "value": None,
+                    "unit": unit,
+                    "confidence": 0.0,
+                    "angle": None,
+                    "error": "Could not detect needle",
+                }
+
+            # Calculate value from angle
+            value = self._angle_to_value(angle, min_value, max_value)
+
+            result = {
+                "value": round(value, 2),
                 "unit": unit,
-                "confidence": 0.0,
-                "angle": None,
-                "error": "Could not detect gauge circle",
+                "confidence": round(confidence, 3),
+                "angle": round(angle, 2),
             }
-
-        # Detect needle angle
-        angle, confidence = self._detect_needle_angle(img, center, radius)
-
-        if angle is None:
-            return {
-                "value": None,
-                "unit": unit,
-                "confidence": 0.0,
-                "angle": None,
-                "error": "Could not detect needle",
-            }
-
-        # Calculate value from angle
-        value = self._angle_to_value(angle, min_value, max_value)
-
-        return {
-            "value": round(value, 2),
-            "unit": unit,
-            "confidence": round(confidence, 3),
-            "angle": round(angle, 2),
-        }
+            _logger.info(
+                "Gauge read complete",
+                value=result["value"],
+                confidence=result["confidence"],
+            )
+            return result
 
     def _find_gauge_circle(
         self,

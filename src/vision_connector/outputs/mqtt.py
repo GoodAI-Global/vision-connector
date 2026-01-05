@@ -14,6 +14,11 @@ from typing import Any, Callable, Dict, Optional
 
 import paho.mqtt.client as mqtt
 
+from vision_connector.logging import get_logger
+
+# Module logger
+_logger = get_logger(__name__)
+
 
 class MQTTOutput:
     """
@@ -76,6 +81,13 @@ class MQTTOutput:
             tls_keyfile: Path to client key for mutual TLS.
             tls_insecure: Skip server certificate verification (not recommended).
         """
+        _logger.debug(
+            "Initializing MQTTOutput",
+            broker=broker,
+            topic=topic,
+            use_tls=use_tls,
+        )
+
         # Parse broker address (supports IPv6)
         self.host, parsed_port = self._parse_broker_address(broker)
         default_port = 8883 if use_tls else 1883
@@ -113,9 +125,16 @@ class MQTTOutput:
         # Configure TLS
         if use_tls:
             self._configure_tls()
+            _logger.debug("TLS configured")
 
         # Connection state
         self._connected = False
+        _logger.info(
+            "MQTTOutput initialized",
+            host=self.host,
+            port=self.port,
+            topic=self.topic,
+        )
         self._on_connect_callback: Optional[Callable] = None
         self._on_disconnect_callback: Optional[Callable] = None
 
@@ -170,14 +189,17 @@ class MQTTOutput:
         """Handle connection events."""
         if rc == 0:
             self._connected = True
+            _logger.info("MQTT connected", host=self.host, port=self.port)
             if self._on_connect_callback:
                 self._on_connect_callback()
         else:
             self._connected = False
+            _logger.error("MQTT connection failed", rc=rc)
 
     def _on_disconnect(self, client, userdata, rc, *args):
         """Handle disconnection events."""
         self._connected = False
+        _logger.info("MQTT disconnected", rc=rc)
         if self._on_disconnect_callback:
             self._on_disconnect_callback()
 
@@ -204,6 +226,12 @@ class MQTTOutput:
                 time.sleep(0.1)
 
             if not self._connected:
+                _logger.error(
+                    "MQTT connection timeout",
+                    host=self.host,
+                    port=self.port,
+                    timeout=timeout,
+                )
                 raise ConnectionError(
                     f"Failed to connect to MQTT broker at {self.host}:{self.port}"
                 )
@@ -211,6 +239,7 @@ class MQTTOutput:
             return True
 
         except Exception as e:
+            _logger.error("MQTT connection failed", error=str(e))
             raise ConnectionError(
                 f"MQTT connection failed: {e}\n"
                 f"Ensure the broker is running at {self.host}:{self.port}"
@@ -251,14 +280,22 @@ class MQTTOutput:
         json_payload = json.dumps(payload)
 
         # Publish
+        target_topic = topic or self.topic
         result = self.client.publish(
-            topic or self.topic,
+            target_topic,
             json_payload,
             qos=self.qos,
             retain=self.retain,
         )
 
-        return result.rc == mqtt.MQTT_ERR_SUCCESS
+        success = result.rc == mqtt.MQTT_ERR_SUCCESS
+        _logger.debug(
+            "MQTT message published",
+            topic=target_topic,
+            success=success,
+            payload_size=len(json_payload),
+        )
+        return success
 
     def publish_batch(
         self,

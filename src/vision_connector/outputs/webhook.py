@@ -13,6 +13,11 @@ from urllib.parse import urlparse
 
 import requests
 
+from vision_connector.logging import get_logger
+
+# Module logger
+_logger = get_logger(__name__)
+
 
 class WebhookOutput:
     """
@@ -55,6 +60,12 @@ class WebhookOutput:
             retry_delay: Delay between retries in seconds.
             verify_ssl: Verify SSL certificates (default True, set False for testing only).
         """
+        _logger.debug(
+            "Initializing WebhookOutput",
+            url=url,
+            method=method,
+            retries=retries,
+        )
         self.url = self._validate_url(url)
         self.method = self._validate_method(method)
         self.timeout = timeout
@@ -81,6 +92,12 @@ class WebhookOutput:
         self.session.verify = verify_ssl
         if auth:
             self.session.auth = auth
+
+        _logger.info(
+            "WebhookOutput initialized",
+            url=self.url,
+            method=self.method,
+        )
 
     def _validate_url(self, url: str) -> str:
         """Validate URL format and scheme."""
@@ -155,19 +172,36 @@ class WebhookOutput:
                     )
 
                 # Return result
-                return {
+                result = {
                     "success": response.ok,
                     "status_code": response.status_code,
                     "response": self._parse_response(response),
                 }
+                _logger.debug(
+                    "Webhook request completed",
+                    status_code=response.status_code,
+                    success=response.ok,
+                )
+                return result
 
             except requests.RequestException as e:
                 last_error = e
+                _logger.warning(
+                    "Webhook request failed, retrying",
+                    attempt=attempt + 1,
+                    max_retries=self.retries,
+                    error=str(e),
+                )
                 if attempt < self.retries:
                     time.sleep(self.retry_delay * (attempt + 1))  # Exponential backoff
                 continue
 
         # All retries failed
+        _logger.error(
+            "Webhook request failed after all retries",
+            attempts=self.retries + 1,
+            error=str(last_error),
+        )
         raise requests.RequestException(
             f"Webhook request failed after {self.retries + 1} attempts: {last_error}"
         )
