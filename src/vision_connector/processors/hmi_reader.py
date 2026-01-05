@@ -17,6 +17,7 @@ from PIL import Image
 from vision_connector.logging import get_logger, log_performance
 from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import load_image, crop_region
+from vision_connector.exceptions import RegionError, NoDisplayError, ImageProcessingError
 
 # Module logger
 _logger = get_logger(__name__)
@@ -132,7 +133,7 @@ class HMIReader:
 
             if not active_regions:
                 _logger.error("No regions specified for reading")
-                raise ValueError(
+                raise RegionError(
                     "No regions specified. Provide regions via:\n"
                     "  1. regions parameter: reader.read_image(img, regions={...})\n"
                     "  2. config file: HMIReader(config='config.json')\n"
@@ -232,7 +233,7 @@ class HMIReader:
 
             if not active_regions:
                 _logger.error("No regions specified")
-                raise ValueError("No regions specified.")
+                raise RegionError("No regions specified.")
 
             img = load_image(image)
             results: Dict[str, Dict] = {}
@@ -294,7 +295,7 @@ class HMIReader:
 
         if not display and os.name != "nt":  # Not Windows and no DISPLAY
             _logger.error("No display available for interactive ROI selection")
-            raise RuntimeError(
+            raise NoDisplayError(
                 "No display available for interactive ROI selection.\n"
                 "In headless environments, specify ROI via:\n"
                 "  1. Config file: HMIReader(config='config.json')\n"
@@ -305,9 +306,12 @@ class HMIReader:
         # Import cv2 with GUI support (will fail in headless)
         try:
             import cv2
-        except ImportError:
+        except ImportError as e:
             _logger.error("OpenCV not available for GUI operations")
-            raise RuntimeError("OpenCV not available for GUI operations.")
+            raise ImageProcessingError(
+                "OpenCV not available for GUI operations.",
+                original_error=e,
+            )
 
         img = load_image(image)
 
@@ -322,7 +326,7 @@ class HMIReader:
 
         if w == 0 or h == 0:
             _logger.warning("ROI selection cancelled or invalid")
-            raise ValueError("No region selected (cancelled or invalid selection).")
+            raise RegionError("No region selected (cancelled or invalid selection).")
 
         result = {"x": int(x), "y": int(y), "w": int(w), "h": int(h)}
         _logger.info("ROI selected", region=result)

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from vision_connector import HMIReader
+from vision_connector.exceptions import RegionError, NoDisplayError
 
 
 # Get project root for sample files
@@ -87,7 +88,7 @@ class TestHMIReaderReadImage:
 
     def test_read_image_no_regions_raises_error(self, hmi_reader):
         """Test that reading without regions raises ValueError."""
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(RegionError) as exc_info:
             hmi_reader.read_image(SAMPLE_IMAGE)
 
         assert "No regions specified" in str(exc_info.value)
@@ -171,8 +172,8 @@ class TestHeadlessOperation:
         os.environ.pop("DISPLAY", None)
 
         try:
-            # Should raise RuntimeError in headless environment
-            with pytest.raises(RuntimeError) as exc_info:
+            # Should raise NoDisplayError in headless environment
+            with pytest.raises(NoDisplayError) as exc_info:
                 hmi_reader.select_roi_interactive(SAMPLE_IMAGE)
 
             assert "No display available" in str(exc_info.value)

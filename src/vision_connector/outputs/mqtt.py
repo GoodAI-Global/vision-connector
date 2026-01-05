@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, Optional
 import paho.mqtt.client as mqtt
 
 from vision_connector.logging import get_logger
+from vision_connector.exceptions import MQTTError, ValidationError
 
 # Module logger
 _logger = get_logger(__name__)
@@ -166,7 +167,10 @@ class MQTTOutput:
     def _validate_qos(self, qos: int) -> int:
         """Validate QoS level."""
         if qos not in (0, 1, 2):
-            raise ValueError(f"Invalid QoS level: {qos}. Must be 0, 1, or 2.")
+            raise ValidationError(
+                f"Invalid QoS level: {qos}. Must be 0, 1, or 2.",
+                details={"qos": qos, "valid_values": [0, 1, 2]},
+            )
         return qos
 
     def _configure_tls(self) -> None:
@@ -232,17 +236,22 @@ class MQTTOutput:
                     port=self.port,
                     timeout=timeout,
                 )
-                raise ConnectionError(
-                    f"Failed to connect to MQTT broker at {self.host}:{self.port}"
+                raise MQTTError(
+                    f"Failed to connect to MQTT broker at {self.host}:{self.port}",
+                    details={"host": self.host, "port": self.port, "timeout": timeout},
                 )
 
             return True
 
+        except MQTTError:
+            raise
         except Exception as e:
             _logger.error("MQTT connection failed", error=str(e))
-            raise ConnectionError(
+            raise MQTTError(
                 f"MQTT connection failed: {e}\n"
-                f"Ensure the broker is running at {self.host}:{self.port}"
+                f"Ensure the broker is running at {self.host}:{self.port}",
+                details={"host": self.host, "port": self.port},
+                original_error=e,
             ) from e
 
     def disconnect(self) -> None:
@@ -269,7 +278,7 @@ class MQTTOutput:
             True if published successfully.
         """
         if not self._connected:
-            raise ConnectionError("Not connected to MQTT broker. Call connect() first.")
+            raise MQTTError("Not connected to MQTT broker. Call connect() first.")
 
         # Prepare payload
         payload = dict(data)

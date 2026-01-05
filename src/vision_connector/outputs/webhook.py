@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 import requests
 
 from vision_connector.logging import get_logger
+from vision_connector.exceptions import WebhookError, ValidationError
 
 # Module logger
 _logger = get_logger(__name__)
@@ -104,16 +105,23 @@ class WebhookOutput:
         parsed = urlparse(url)
 
         if not parsed.scheme:
-            raise ValueError(f"Invalid URL: missing scheme (http/https): {url}")
+            raise ValidationError(
+                f"Invalid URL: missing scheme (http/https): {url}",
+                details={"url": url, "issue": "missing_scheme"},
+            )
 
         if parsed.scheme.lower() not in self.ALLOWED_SCHEMES:
-            raise ValueError(
+            raise ValidationError(
                 f"Invalid URL scheme: {parsed.scheme}. "
-                f"Allowed: {', '.join(self.ALLOWED_SCHEMES)}"
+                f"Allowed: {', '.join(self.ALLOWED_SCHEMES)}",
+                details={"url": url, "scheme": parsed.scheme, "allowed": list(self.ALLOWED_SCHEMES)},
             )
 
         if not parsed.netloc:
-            raise ValueError(f"Invalid URL: missing host: {url}")
+            raise ValidationError(
+                f"Invalid URL: missing host: {url}",
+                details={"url": url, "issue": "missing_host"},
+            )
 
         return url
 
@@ -121,7 +129,10 @@ class WebhookOutput:
         """Validate HTTP method."""
         method = method.upper()
         if method not in ("POST", "PUT", "PATCH"):
-            raise ValueError(f"Unsupported HTTP method: {method}. Use POST, PUT, or PATCH.")
+            raise ValidationError(
+                f"Unsupported HTTP method: {method}. Use POST, PUT, or PATCH.",
+                details={"method": method, "allowed": ["POST", "PUT", "PATCH"]},
+            )
         return method
 
     def send(

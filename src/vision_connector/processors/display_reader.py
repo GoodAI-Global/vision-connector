@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from vision_connector.logging import get_logger
 from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import (
     load_image,
@@ -19,6 +20,9 @@ from vision_connector.utils.image_utils import (
     preprocess_for_ocr,
     detect_text_color_scheme,
 )
+
+# Module logger
+_logger = get_logger(__name__)
 
 
 class DisplayReader:
@@ -45,7 +49,9 @@ class DisplayReader:
         Args:
             tesseract_cmd: Optional path to tesseract executable.
         """
+        _logger.debug("Initializing DisplayReader")
         self.ocr = OCRProcessor(tesseract_cmd=tesseract_cmd)
+        _logger.info("DisplayReader initialized")
 
     def read_display(
         self,
@@ -67,6 +73,7 @@ class DisplayReader:
                 - raw_text: Raw OCR text
                 - confidence: OCR confidence score
         """
+        _logger.debug("Reading display", display_type=display_type, has_region=region is not None)
         img = load_image(image)
 
         if region:
@@ -97,11 +104,13 @@ class DisplayReader:
         # Get confidence
         confidence = self.ocr.get_average_confidence(processed)
 
-        return {
+        result = {
             "value": value,
             "raw_text": raw_text,
             "confidence": round(confidence, 3),
         }
+        _logger.debug("Display read complete", value=value, confidence=round(confidence, 3))
+        return result
 
     def read_multi_digit(
         self,

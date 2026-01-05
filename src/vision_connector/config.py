@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 from vision_connector.logging import get_logger
+from vision_connector.exceptions import ConfigurationError
 
 _logger = get_logger(__name__)
 
@@ -28,11 +29,6 @@ except ImportError:
 
 
 T = TypeVar("T")
-
-
-class ConfigurationError(Exception):
-    """Raised when configuration is invalid."""
-    pass
 
 
 class Config:

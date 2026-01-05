@@ -14,6 +14,7 @@ import pytesseract
 from PIL import Image
 
 from vision_connector.logging import get_logger
+from vision_connector.exceptions import TesseractNotFoundError
 from vision_connector.utils.image_utils import (
     load_image,
     crop_region,
@@ -84,12 +85,12 @@ class OCRProcessor:
             _logger.debug("Tesseract verified", version=self._tesseract_version)
         except Exception as e:
             _logger.error("Tesseract OCR not found", error=str(e))
-            raise RuntimeError(
-                f"Tesseract OCR not found. Please install Tesseract:\n"
-                f"  Ubuntu/Debian: sudo apt-get install tesseract-ocr\n"
-                f"  macOS: brew install tesseract\n"
-                f"  Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki\n"
-                f"Original error: {e}"
+            raise TesseractNotFoundError(
+                "Tesseract OCR not found. Please install Tesseract:\n"
+                "  Ubuntu/Debian: sudo apt-get install tesseract-ocr\n"
+                "  macOS: brew install tesseract\n"
+                "  Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki",
+                original_error=e,
             ) from e
 
     def extract_text(
