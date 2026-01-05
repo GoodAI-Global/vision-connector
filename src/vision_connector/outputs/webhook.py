@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 import requests
 
 from vision_connector.logging import get_logger
-from vision_connector.exceptions import WebhookError, ValidationError
+from vision_connector.exceptions import ValidationError
 
 # Module logger
 _logger = get_logger(__name__)

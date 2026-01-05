@@ -6,7 +6,7 @@ All functions work headless - no display required.
 """
 
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union, TypedDict
+from typing import Dict, Tuple, Union, TypedDict
 
 import cv2
 import numpy as np

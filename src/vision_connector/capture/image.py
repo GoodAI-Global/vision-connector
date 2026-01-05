@@ -7,7 +7,7 @@ Works headless - no display required.
 
 import time
 from pathlib import Path
-from typing import Generator, List, Optional, Union
+from typing import Generator, List, Union
 
 import cv2
 import numpy as np

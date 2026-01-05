@@ -14,9 +14,9 @@ from typing import Any, Dict, Optional, Union
 import numpy as np
 from PIL import Image
 
-from vision_connector.logging import get_logger, log_performance
+from vision_connector.logging import get_logger
 from vision_connector.processors.ocr import OCRProcessor
-from vision_connector.utils.image_utils import load_image, crop_region
+from vision_connector.utils.image_utils import load_image
 from vision_connector.exceptions import RegionError, NoDisplayError, ImageProcessingError
 
 # Module logger

@@ -9,7 +9,7 @@ Works headless when using programmatic methods.
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import cv2
 import numpy as np

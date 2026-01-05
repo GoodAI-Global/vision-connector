@@ -11,7 +11,7 @@ Provides enterprise-grade observability with:
 
 import functools
 import time
-from typing import Any, Callable, Optional
+from typing import Callable
 
 from vision_connector.logging import get_logger
 

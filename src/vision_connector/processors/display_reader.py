@@ -17,7 +17,6 @@ from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import (
     load_image,
     crop_region,
-    preprocess_for_ocr,
     detect_text_color_scheme,
 )
 

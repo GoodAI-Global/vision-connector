@@ -6,9 +6,8 @@ Works headless - no display required.
 """
 
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
-import cv2
 import numpy as np
 import pytesseract
 from PIL import Image
