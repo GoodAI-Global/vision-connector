@@ -9,7 +9,6 @@ that can be used for testing the vision capture library.
 import math
 from pathlib import Path
 
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -63,7 +62,9 @@ def create_hmi_screen(output_path: Path) -> dict:
     draw.text((width - 120, 15), "RUNNING", fill=text_green, font=get_font(20))
 
     # Main panel background
-    draw.rectangle([20, 70, width - 20, height - 20], fill=bg_dark, outline=(80, 80, 80))
+    draw.rectangle(
+        [20, 70, width - 20, height - 20], fill=bg_dark, outline=(80, 80, 80)
+    )
 
     # Define regions and values
     regions = {}
@@ -77,7 +78,13 @@ def create_hmi_screen(output_path: Path) -> dict:
     temp_x, temp_y = 40, value_y
     draw.text((temp_x, temp_y), "185.5", fill=text_green, font=value_font)
     draw.text((140, value_y + 5), "°C", fill=(150, 150, 150), font=get_font(20))
-    regions["temperature"] = {"x": temp_x, "y": temp_y, "w": 95, "h": 40, "type": "number"}
+    regions["temperature"] = {
+        "x": temp_x,
+        "y": temp_y,
+        "w": 95,
+        "h": 40,
+        "type": "number",
+    }
 
     # Pressure
     label_y = 200
@@ -95,14 +102,26 @@ def create_hmi_screen(output_path: Path) -> dict:
     flow_x, flow_y = 40, value_y
     draw.text((flow_x, flow_y), "127.8", fill=text_yellow, font=value_font)
     draw.text((145, value_y + 5), "L/min", fill=(150, 150, 150), font=get_font(20))
-    regions["flow_rate"] = {"x": flow_x, "y": flow_y, "w": 105, "h": 40, "type": "number"}
+    regions["flow_rate"] = {
+        "x": flow_x,
+        "y": flow_y,
+        "w": 105,
+        "h": 40,
+        "type": "number",
+    }
 
     # Status panel on right side
     draw.rectangle([320, 100, 600, 200], fill=(50, 54, 62), outline=(80, 80, 80))
     draw.text((340, 110), "SYSTEM STATUS", fill=(150, 150, 150), font=label_font)
     status_x, status_y = 340, 145
     draw.text((status_x, status_y), "RUNNING", fill=text_green, font=value_font)
-    regions["status"] = {"x": status_x, "y": status_y, "w": 140, "h": 40, "type": "text"}
+    regions["status"] = {
+        "x": status_x,
+        "y": status_y,
+        "w": 140,
+        "h": 40,
+        "type": "text",
+    }
 
     # Alarm panel
     draw.rectangle([320, 220, 600, 320], fill=(50, 54, 62), outline=(80, 80, 80))
@@ -116,7 +135,13 @@ def create_hmi_screen(output_path: Path) -> dict:
     draw.text((340, 350), "UNITS PRODUCED", fill=(150, 150, 150), font=label_font)
     count_x, count_y = 340, 385
     draw.text((count_x, count_y), "1247", fill=text_white, font=value_font)
-    regions["units_produced"] = {"x": count_x, "y": count_y, "w": 85, "h": 40, "type": "number"}
+    regions["units_produced"] = {
+        "x": count_x,
+        "y": count_y,
+        "w": 85,
+        "h": 40,
+        "type": "number",
+    }
 
     # Save image
     img.save(output_path)
@@ -225,7 +250,9 @@ def create_digital_display(output_path: Path) -> dict:
     draw = ImageDraw.Draw(img)
 
     # Draw display background
-    draw.rectangle([10, 10, width - 10, height - 10], fill=(5, 5, 5), outline=(60, 60, 60))
+    draw.rectangle(
+        [10, 10, width - 10, height - 10], fill=(5, 5, 5), outline=(60, 60, 60)
+    )
 
     # Draw the number in red (simulating LED display)
     display_font = get_font(60)

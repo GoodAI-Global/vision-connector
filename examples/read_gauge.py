@@ -35,10 +35,7 @@ def main():
     print("-" * 40)
 
     result = reader.read_analog_gauge(
-        gauge_path,
-        min_value=0,
-        max_value=100,
-        unit="PSI"
+        gauge_path, min_value=0, max_value=100, unit="PSI"
     )
 
     print("Gauge reading:")

@@ -1,0 +1,15 @@
+# Code Owners for vision-connector
+# These users will be requested for review on PRs
+
+# Default owners for everything
+* @GoodAI-Global/maintainers
+
+# Core library
+/src/vision_connector/ @GoodAI-Global/maintainers
+
+# CI/CD and infrastructure
+/.github/ @GoodAI-Global/maintainers
+/Makefile @GoodAI-Global/maintainers
+
+# Documentation
+/*.md @GoodAI-Global/maintainers

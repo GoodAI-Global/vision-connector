@@ -15,7 +15,6 @@ from datetime import datetime
 from pathlib import Path
 
 from vision_connector import HMIReader
-from vision_connector.capture import ImageCapture
 from vision_connector.outputs import CSVWriter
 
 

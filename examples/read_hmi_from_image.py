@@ -50,7 +50,7 @@ def main():
             "temperature": {"x": 40, "y": 130, "w": 95, "h": 40, "type": "number"},
             "pressure": {"x": 40, "y": 230, "w": 80, "h": 40, "type": "number"},
             "status": {"x": 340, "y": 145, "w": 140, "h": 40, "type": "text"},
-        }
+        },
     )
 
     print("Extracted values:")
@@ -66,7 +66,7 @@ def main():
         regions={
             "temperature": {"x": 40, "y": 130, "w": 95, "h": 40, "type": "number"},
             "status": {"x": 340, "y": 145, "w": 140, "h": 40, "type": "text"},
-        }
+        },
     )
 
     print("Extracted values with metadata:")
