@@ -1,0 +1,17 @@
+# Code Owners
+# These owners will be requested for review when someone opens a pull request.
+
+# Default owners for everything in the repo
+* @goodai/vision-connector-maintainers
+
+# Core library
+/src/vision_connector/ @goodai/vision-connector-maintainers
+
+# Tests
+/tests/ @goodai/vision-connector-maintainers
+
+# Documentation
+*.md @goodai/vision-connector-maintainers
+
+# CI/CD
+/.github/ @goodai/vision-connector-maintainers

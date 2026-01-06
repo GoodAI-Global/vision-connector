@@ -2,61 +2,49 @@
 
 **Non-invasive industrial data capture using computer vision**
 
-*By Good AI - Premium Enterprise AI Consultancy*
+[![CI](https://github.com/goodai/vision-connector/actions/workflows/ci.yml/badge.svg)](https://github.com/goodai/vision-connector/actions/workflows/ci.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## The Problem
+## What It Is
 
-In industrial environments, critical operational data is often locked away:
+Vision Connector extracts data from industrial displays using computer vision and OCR:
 
-- **PLCs are locked** — Proprietary protocols, vendor lock-in, security restrictions
-- **ERPs are ancient** — No APIs, no integrations, COBOL from the 80s
-- **IT won't give access** — Months of approval processes, security reviews, budget constraints
+- **HMI Screen Reader** - Extract values from SCADA/HMI screen captures
+- **Gauge Reader** - Read analog gauges via needle detection
+- **Display Reader** - Process 7-segment and LED displays
+- **Multiple Outputs** - CSV, MQTT, Webhook
 
-Meanwhile, operators stare at screens full of valuable data every day.
+**Use case**: You have a legacy system with no API access. Point a camera at the screen, define regions of interest, and extract the data programmatically.
 
-## The Solution
+## What It Isn't
 
-**Point a camera at the screen operators already look at.**
+- **Not a real-time video processing system** - Designed for periodic snapshots, not 60fps streams
+- **Not a general-purpose OCR tool** - Optimized for industrial displays, not documents
+- **Not production-hardened yet** - v0.1.0 is functional but needs battle-testing
+- **Not a screen capture tool** - You provide the images; it extracts the data
 
-Vision Connector extracts data from HMI screens, gauges, and digital displays using computer vision and OCR — without touching the underlying systems.
+## Status
 
-This is **non-invasive intelligence**: bypass legacy constraints without system integration.
+**v0.1.0** - Early release. Core functionality works. Test coverage exists. Not yet battle-tested in production environments.
+
+| Component | Status |
+|-----------|--------|
+| HMI Reader | Functional |
+| Gauge Reader | Functional |
+| Display Reader | Functional |
+| MQTT Output | Functional |
+| Webhook Output | Functional |
+| CSV Output | Functional |
+| Test Suite | 146 tests passing |
 
 ---
 
-## Why Non-Invasive?
+## Quickstart (< 5 minutes)
 
-| Traditional Integration | Vision Connector |
-|------------------------|------------------|
-| Months of planning | Deploy in hours |
-| IT approval required | No system access needed |
-| Risk of downtime | Zero production impact |
-| Vendor dependencies | Works with any display |
-| Expensive integrations | Low-cost cameras |
-
-**Augment first, automate later.** Digitize manual processes before committing to expensive automation projects.
-
----
-
-## Quick Start
-
-### Installation
-
-```bash
-# Install the library
-pip install vision-connector
-
-# Or install from source
-git clone https://github.com/goodai/vision-connector.git
-cd vision-connector
-pip install -e .
-```
-
-### System Requirements
-
-Tesseract OCR must be installed:
+### 1. Install Tesseract OCR
 
 ```bash
 # Ubuntu/Debian
@@ -65,34 +53,59 @@ sudo apt-get install tesseract-ocr
 # macOS
 brew install tesseract
 
-# Windows
-# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+# Windows: https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
-### Run the Demo
+### 2. Install vision-connector
 
 ```bash
-python demo_run.py
+pip install vision-connector
+
+# Or from source
+git clone https://github.com/goodai/vision-connector.git
+cd vision-connector
+pip install -e .
 ```
 
-### Basic Usage
+### 3. Extract data from an image
 
 ```python
 from vision_connector import HMIReader
 
-# Read values from an HMI screen
 reader = HMIReader()
 result = reader.read_image(
     "screenshot.png",
     regions={
         "temperature": {"x": 100, "y": 200, "w": 80, "h": 30},
         "pressure": {"x": 100, "y": 250, "w": 80, "h": 30},
-        "status": {"x": 300, "y": 100, "w": 100, "h": 40}
     }
 )
-
 print(result)
-# {"temperature": "185.5", "pressure": "42.3", "status": "RUNNING"}
+# {"temperature": "185.5", "pressure": "42.3"}
+```
+
+### 4. Run the demo
+
+```bash
+python demo_run.py
+```
+
+---
+
+## Installation Options
+
+```bash
+# Core only
+pip install vision-connector
+
+# With Prometheus metrics
+pip install vision-connector[metrics]
+
+# With YAML config support
+pip install vision-connector[config]
+
+# All optional dependencies
+pip install vision-connector[all]
 ```
 
 ---
@@ -101,241 +114,90 @@ print(result)
 
 ### HMI Screen Reader
 
-Extract data from industrial HMI screens and SCADA displays.
-
 ```python
 from vision_connector import HMIReader
 
-# Using config file
-reader = HMIReader(config="config.json")
+reader = HMIReader(config="config.json")  # Or define regions inline
 result = reader.read_image("hmi_screenshot.png")
-
-# Or define regions inline
-reader = HMIReader()
-result = reader.read_image(
-    "screenshot.png",
-    regions={
-        "temperature": {"x": 100, "y": 200, "w": 80, "h": 30, "type": "number"},
-        "status": {"x": 300, "y": 100, "w": 100, "h": 40, "type": "text"}
-    }
-)
 ```
 
 ### Gauge Reader
-
-Read analog gauges with needle detection.
 
 ```python
 from vision_connector import GaugeReader
 
 reader = GaugeReader()
-result = reader.read_analog_gauge(
-    "gauge.png",
-    min_value=0,
-    max_value=100,
-    unit="PSI"
-)
-# {"value": 67.5, "unit": "PSI", "confidence": 0.92}
+result = reader.read_analog_gauge("gauge.png", min_value=0, max_value=100)
+# {"value": 67.5, "confidence": 0.92}
 ```
 
 ### Display Reader
-
-Read 7-segment and LED digital displays.
 
 ```python
 from vision_connector import DisplayReader
 
 reader = DisplayReader()
-result = reader.read_display(
-    "display.png",
-    display_type="7segment"
-)
-# {"value": 1234.5, "raw_text": "1234.5", "confidence": 0.95}
+result = reader.read_display("display.png", display_type="7segment")
+# {"value": 1234.5, "confidence": 0.95}
 ```
 
-### OCR Processor
-
-Direct OCR access for custom applications.
+### Output Options
 
 ```python
-from vision_connector.processors import OCRProcessor
+from vision_connector.outputs import CSVWriter, MQTTOutput, WebhookOutput
 
-ocr = OCRProcessor()
-text = ocr.extract_text(image, region={"x": 0, "y": 0, "w": 100, "h": 50})
-numbers = ocr.extract_numbers(image)
-```
-
----
-
-## Output Options
-
-### CSV Logging
-
-```python
-from vision_connector.outputs import CSVWriter
-
+# CSV
 csv = CSVWriter("readings.csv")
-csv.append({"temperature": 185.5, "pressure": 42.3})
-```
+csv.append({"temperature": 185.5})
 
-### MQTT Streaming
-
-```python
-from vision_connector.outputs import MQTTOutput
-
-mqtt = MQTTOutput("localhost:1883", topic="plant/line1/readings")
+# MQTT
+mqtt = MQTTOutput("localhost:1883", topic="plant/readings")
 mqtt.connect()
-mqtt.publish({"temperature": 185.5, "pressure": 42.3})
-mqtt.disconnect()
-```
+mqtt.publish({"temperature": 185.5})
 
-### Webhook
-
-```python
-from vision_connector.outputs import WebhookOutput
-
+# Webhook
 webhook = WebhookOutput("https://api.example.com/readings")
-webhook.send({"temperature": 185.5, "pressure": 42.3})
+webhook.send({"temperature": 185.5})
 ```
 
 ---
 
-## Configuration
+## Enterprise Features (v0.1.0)
 
-### Config File Format
-
-```json
-{
-  "capture": {
-    "source": "image",
-    "path": "sample_images/hmi_screen.png"
-  },
-  "regions": {
-    "temperature": {"x": 100, "y": 200, "w": 80, "h": 30, "type": "number"},
-    "pressure": {"x": 100, "y": 250, "w": 80, "h": 30, "type": "number"},
-    "status": {"x": 300, "y": 100, "w": 100, "h": 40, "type": "text"}
-  },
-  "output": {
-    "type": "csv",
-    "path": "output/readings.csv"
-  }
-}
-```
-
-### Region Types
-
-- `number` — Extract numeric values (integers and decimals)
-- `text` — Extract text strings
-- `auto` — Automatically detect content type
+- **Structured Logging** - JSON/text formatters, operation tracing
+- **Prometheus Metrics** - Optional observability (`pip install vision-connector[metrics]`)
+- **Configuration Management** - YAML files + environment variable overrides
+- **Custom Exceptions** - Typed error hierarchy for programmatic handling
+- **Resilience Patterns** - Retry with backoff, circuit breaker, timeouts
 
 ---
 
-## Headless Operation
-
-Vision Connector is designed to work in headless environments (Docker, CI, servers).
-
-```python
-# ROI can be specified via config or parameters - no GUI required
-reader = HMIReader(config="config.json")
-result = reader.read_image("screenshot.png")
-
-# Interactive selection only when display is available
-import os
-if os.environ.get("DISPLAY"):
-    roi = reader.select_roi_interactive(image)
-else:
-    # Use config-based regions
-    pass
-```
-
----
-
-## Capture Options
-
-### From Image File
-
-```python
-from vision_connector.capture import ImageCapture
-
-cap = ImageCapture("screenshot.png")
-img = cap.read()
-```
-
-### From Camera
-
-```python
-from vision_connector.capture import CameraCapture
-
-# USB camera
-cam = CameraCapture(0)
-frame = cam.read()
-
-# IP camera
-cam = CameraCapture("rtsp://192.168.1.100:554/stream")
-for frame in cam.stream():
-    process(frame)
-```
-
----
-
-## Calibration
-
-### ROI Selector
-
-Define regions of interest programmatically or interactively.
-
-```python
-from vision_connector.calibration import ROISelector
-
-selector = ROISelector()
-
-# Programmatic (works headless)
-selector.add_region("temperature", x=100, y=200, w=80, h=30)
-selector.add_region("pressure", x=100, y=250, w=80, h=30)
-selector.save_config("config.json")
-
-# Interactive (requires display)
-if os.environ.get("DISPLAY"):
-    selector.select_interactive("screenshot.png")
-```
-
----
-
-## Examples
-
-See the `examples/` directory for complete working examples:
-
-- `read_hmi_from_image.py` — Read HMI screen from image file
-- `read_gauge.py` — Read analog gauge
-- `continuous_monitor.py` — Continuous monitoring with CSV output
-
----
-
-## Testing
+## Development
 
 ```bash
-# Run all tests
-pytest
+# Setup
+make setup
 
-# Run with coverage
-pytest --cov=vision_connector
+# Run tests
+make test
 
-# Run specific test file
-pytest tests/test_hmi_reader.py
+# Lint
+make lint
+
+# Clean
+make clean
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
 ---
 
-## Dependencies
+## Documentation
 
-- `opencv-python-headless` — Computer vision (headless, no GUI)
-- `pytesseract` — OCR engine wrapper
-- `numpy` — Array operations
-- `Pillow` — Image handling
-- `paho-mqtt` — MQTT client
-- `requests` — HTTP client
-
-**System requirement:** Tesseract OCR
+- [CHANGELOG.md](CHANGELOG.md) - Version history
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Development setup
+- [SECURITY.md](SECURITY.md) - Security policy
+- [RELEASING.md](RELEASING.md) - Release process
 
 ---
 
@@ -345,31 +207,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## About Good AI
+## About
 
-**Good AI** is a premium enterprise AI consultancy specializing in:
-
-- **Non-invasive Intelligence** — Extract value from legacy systems without integration
-- **Augment First** — Digitize manual processes before automation
-- **Industrial AI** — Computer vision, predictive maintenance, process optimization
-
-*Unlock the value in your operations without the complexity of traditional integrations.*
-
----
-
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `pytest`
-5. Submit a pull request
-
----
-
-## Support
-
-- GitHub Issues: [Report bugs or request features](https://github.com/goodai/vision-connector/issues)
-- Documentation: [Full documentation](https://github.com/goodai/vision-connector#readme)
+Built by [Good AI](https://goodai.com) - Enterprise AI Consultancy.
