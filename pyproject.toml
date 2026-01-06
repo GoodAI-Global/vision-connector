@@ -5,38 +5,37 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vision-connector"
 version = "0.1.0"
-description = "Non-invasive industrial data capture using computer vision - by Good AI"
+description = "Non-invasive industrial data capture using computer vision"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
-    {name = "rogermsc", email = "rogermsc@gmail.com"}
+    {name = "Good AI", email = "contact@wearegoodai.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 keywords = [
     "industrial",
     "computer-vision",
     "ocr",
     "hmi",
+    "scada",
     "gauge-reading",
     "non-invasive",
     "data-capture",
-    "manufacturing"
+    "manufacturing",
 ]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Manufacturing",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: Image Recognition",
-    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
-]
+
 dependencies = [
     "opencv-python-headless>=4.5.0",
     "pytesseract>=0.3.10",
@@ -48,10 +47,13 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "mypy>=1.0.0",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "build>=1.0",
+    "twine>=4.0",
 ]
 gui = [
     "opencv-python>=4.5.0",
@@ -69,10 +71,10 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/goodai/vision-connector"
-Documentation = "https://github.com/goodai/vision-connector#readme"
-Repository = "https://github.com/goodai/vision-connector.git"
-Issues = "https://github.com/goodai/vision-connector/issues"
+Homepage = "https://github.com/GoodAI-Global/vision-connector"
+Documentation = "https://github.com/GoodAI-Global/vision-connector#readme"
+Repository = "https://github.com/GoodAI-Global/vision-connector"
+Issues = "https://github.com/GoodAI-Global/vision-connector/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -80,15 +82,19 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+line-length = 88
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+ignore = ["E501"]  # Line length handled by black
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

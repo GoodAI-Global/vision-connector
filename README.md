@@ -2,9 +2,11 @@
 
 **Non-invasive industrial data capture using computer vision**
 
-[![CI](https://github.com/goodai/vision-connector/actions/workflows/ci.yml/badge.svg)](https://github.com/goodai/vision-connector/actions/workflows/ci.yml)
+[![CI](https://github.com/GoodAI-Global/vision-connector/actions/workflows/ci.yml/badge.svg)](https://github.com/GoodAI-Global/vision-connector/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/vision-connector.svg)](https://badge.fury.io/py/vision-connector)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ---
 
