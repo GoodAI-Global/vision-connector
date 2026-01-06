@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Config file generation
 
 - **Quality**
-  - 146 passing tests
+  - 157 passing tests
   - Full headless operation support (opencv-python-headless)
   - Type hints throughout
 
