@@ -18,54 +18,60 @@ This is non-invasive intelligence - bypass legacy constraints without system int
 __version__ = "0.1.0"
 __author__ = "Good AI"
 
-from vision_connector.processors.hmi_reader import HMIReader
-from vision_connector.processors.gauge_reader import GaugeReader
-from vision_connector.processors.display_reader import DisplayReader
-from vision_connector.processors.ocr import OCRProcessor
-from vision_connector.logging import VisionLogger, get_logger, set_context, clear_context
-from vision_connector.metrics import metrics, track_operation, track_duration
-from vision_connector.config import Config, config, load_config
-from vision_connector.exceptions import (
-    VisionConnectorError,
-    ImageProcessingError,
-    ImageLoadError,
-    RegionError,
-    RegionOutOfBoundsError,
-    OCRError,
-    TesseractNotFoundError,
-    OCRExtractionError,
-    LowConfidenceError,
-    GaugeReadingError,
-    GaugeDetectionError,
-    NeedleDetectionError,
-    OutputError,
-    MQTTError,
-    WebhookError,
-    RetryExhaustedError,
-    ConfigurationError,
-    ValidationError,
-    CalibrationError,
-    NoDisplayError,
-)
-from vision_connector.resilience import (
-    retry,
-    CircuitBreaker,
-    CircuitBreakerOpen,
-    CircuitState,
-    with_timeout,
-    with_fallback,
-    RetryConfig,
-    CircuitBreakerConfig,
-)
-
 # Configure logging at package import (can be reconfigured later)
 from typing import Optional as _Optional
+
+from vision_connector.config import Config, config, load_config
+from vision_connector.exceptions import (
+    CalibrationError,
+    ConfigurationError,
+    GaugeDetectionError,
+    GaugeReadingError,
+    ImageLoadError,
+    ImageProcessingError,
+    LowConfidenceError,
+    MQTTError,
+    NeedleDetectionError,
+    NoDisplayError,
+    OCRError,
+    OCRExtractionError,
+    OutputError,
+    RegionError,
+    RegionOutOfBoundsError,
+    RetryExhaustedError,
+    TesseractNotFoundError,
+    ValidationError,
+    VisionConnectorError,
+    WebhookError,
+)
+from vision_connector.logging import (
+    VisionLogger,
+    clear_context,
+    get_logger,
+    set_context,
+)
+from vision_connector.metrics import metrics, track_duration, track_operation
+from vision_connector.processors.display_reader import DisplayReader
+from vision_connector.processors.gauge_reader import GaugeReader
+from vision_connector.processors.hmi_reader import HMIReader
+from vision_connector.processors.ocr import OCRProcessor
+from vision_connector.resilience import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerOpen,
+    CircuitState,
+    RetryConfig,
+    retry,
+    with_fallback,
+    with_timeout,
+)
+
 
 def configure_logging(
     level: str = "INFO",
     json_format: bool = False,
     log_file: _Optional[str] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Configure vision-connector logging.
@@ -82,6 +88,7 @@ def configure_logging(
         log_file=log_file,
         extra_fields=kwargs if kwargs else None,
     )
+
 
 __all__ = [
     # Processors

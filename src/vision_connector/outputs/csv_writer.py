@@ -111,7 +111,9 @@ class CSVWriter:
         if self.fieldnames is None:
             # Put timestamp first if present
             if self.add_timestamp:
-                self.fieldnames = ["timestamp"] + [k for k in row_data.keys() if k != "timestamp"]
+                self.fieldnames = ["timestamp"] + [
+                    k for k in row_data.keys() if k != "timestamp"
+                ]
             else:
                 self.fieldnames = list(row_data.keys())
 

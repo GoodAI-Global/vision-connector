@@ -73,6 +73,7 @@ class VisionConnectorError(Exception):
 
 class ImageProcessingError(VisionConnectorError):
     """Base exception for image processing errors."""
+
     pass
 
 
@@ -132,6 +133,7 @@ class RegionOutOfBoundsError(RegionError):
 
 class OCRError(VisionConnectorError):
     """Base exception for OCR-related errors."""
+
     pass
 
 
@@ -201,6 +203,7 @@ class LowConfidenceError(OCRError):
 
 class GaugeReadingError(VisionConnectorError):
     """Base exception for gauge reading errors."""
+
     pass
 
 
@@ -233,6 +236,7 @@ class NeedleDetectionError(GaugeReadingError):
 
 class OutputError(VisionConnectorError):
     """Base exception for output-related errors."""
+
     pass
 
 
@@ -354,6 +358,7 @@ class ValidationError(ConfigurationError):
 
 class CalibrationError(VisionConnectorError):
     """Raised for calibration-related errors."""
+
     pass
 
 

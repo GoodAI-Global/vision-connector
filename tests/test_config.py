@@ -3,15 +3,14 @@ Tests for the configuration management module.
 """
 
 import os
+
 import pytest
-import tempfile
-from pathlib import Path
 
 from vision_connector.config import (
     Config,
     ConfigurationError,
-    load_config,
     config,
+    load_config,
 )
 
 

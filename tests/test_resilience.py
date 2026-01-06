@@ -2,21 +2,21 @@
 Tests for the resilience patterns module.
 """
 
-import pytest
 import time
-import threading
 
+import pytest
+
+from vision_connector.exceptions import RetryExhaustedError
 from vision_connector.resilience import (
-    retry,
     CircuitBreaker,
+    CircuitBreakerConfig,
     CircuitBreakerOpen,
     CircuitState,
-    with_timeout,
-    with_fallback,
     RetryConfig,
-    CircuitBreakerConfig,
+    retry,
+    with_fallback,
+    with_timeout,
 )
-from vision_connector.exceptions import RetryExhaustedError
 
 
 class TestRetryConfig:
@@ -33,9 +33,9 @@ class TestRetryConfig:
         """Test exponential backoff delay calculation."""
         config = RetryConfig(base_delay=1.0, exponential_base=2.0, jitter=False)
 
-        assert config.get_delay(0) == 1.0   # 1 * 2^0 = 1
-        assert config.get_delay(1) == 2.0   # 1 * 2^1 = 2
-        assert config.get_delay(2) == 4.0   # 1 * 2^2 = 4
+        assert config.get_delay(0) == 1.0  # 1 * 2^0 = 1
+        assert config.get_delay(1) == 2.0  # 1 * 2^1 = 2
+        assert config.get_delay(2) == 4.0  # 1 * 2^2 = 4
 
     def test_get_delay_max_cap(self):
         """Test delay is capped at max_delay."""
@@ -88,6 +88,7 @@ class TestRetryDecorator:
 
     def test_exhausted_retries(self):
         """Test all retries exhausted raises RetryExhaustedError."""
+
         @retry(max_attempts=3, base_delay=0.01)
         def always_fails():
             raise ValueError("Always fails")
@@ -248,6 +249,7 @@ class TestWithTimeout:
 
     def test_fast_operation_succeeds(self):
         """Test fast operation completes normally."""
+
         @with_timeout(1.0)
         def fast_operation():
             return "success"
@@ -257,6 +259,7 @@ class TestWithTimeout:
 
     def test_slow_operation_times_out(self):
         """Test slow operation raises TimeoutError."""
+
         @with_timeout(0.1)
         def slow_operation():
             time.sleep(1.0)
@@ -267,6 +270,7 @@ class TestWithTimeout:
 
     def test_timeout_with_fallback(self):
         """Test timeout uses fallback."""
+
         @with_timeout(0.1, fallback=lambda: "fallback_value")
         def slow_operation():
             time.sleep(1.0)
@@ -277,6 +281,7 @@ class TestWithTimeout:
 
     def test_exception_propagates(self):
         """Test exception from operation is propagated."""
+
         @with_timeout(1.0)
         def failing_operation():
             raise ValueError("Operation failed")
@@ -290,6 +295,7 @@ class TestWithFallback:
 
     def test_success_doesnt_use_fallback(self):
         """Test successful operation doesn't use fallback."""
+
         @with_fallback(lambda: "fallback")
         def successful():
             return "success"
@@ -299,6 +305,7 @@ class TestWithFallback:
 
     def test_failure_uses_fallback(self):
         """Test failed operation uses fallback."""
+
         @with_fallback(lambda: "fallback")
         def failing():
             raise ValueError("Failed")
@@ -308,6 +315,7 @@ class TestWithFallback:
 
     def test_fallback_with_complex_return(self):
         """Test fallback with complex return value."""
+
         @with_fallback(lambda: {"status": "unknown", "data": None})
         def get_data():
             raise ConnectionError("No connection")
@@ -349,6 +357,7 @@ class TestIntegration:
 
     def test_fallback_with_timeout(self):
         """Test fallback with timeout."""
+
         @with_fallback(lambda: "fallback")
         @with_timeout(0.1)
         def slow_with_fallback():

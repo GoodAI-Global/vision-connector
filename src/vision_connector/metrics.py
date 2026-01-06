@@ -22,15 +22,16 @@ _prometheus_available = False
 
 try:
     from prometheus_client import (
-        Counter,
-        Histogram,
-        Gauge,
-        Info,
-        CollectorRegistry,
-        generate_latest,
         CONTENT_TYPE_LATEST,
+        CollectorRegistry,
+        Counter,
+        Gauge,
+        Histogram,
+        Info,
+        generate_latest,
         start_http_server,
     )
+
     _prometheus_available = True
 except ImportError:
     # Prometheus client not installed - provide stub implementations
@@ -256,10 +257,12 @@ class VisionMetrics:
             raise ValueError(f"Port must be between 1 and 65535, got {port}")
 
         # Set build info
-        self.info.info({
-            "version": version,
-            "component": "vision-connector",
-        })
+        self.info.info(
+            {
+                "version": version,
+                "component": "vision-connector",
+            }
+        )
 
         if start_server and not self._server_started:
             try:
@@ -318,6 +321,7 @@ def track_operation(operation_name: str):
         ... def extract_text(image):
         ...     return ocr.process(image)
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -338,6 +342,7 @@ def track_operation(operation_name: str):
                 ).observe(duration)
 
         return wrapper
+
     return decorator
 
 

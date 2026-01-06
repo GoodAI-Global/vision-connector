@@ -15,9 +15,9 @@ from PIL import Image
 from vision_connector.logging import get_logger
 from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import (
-    load_image,
     crop_region,
     detect_text_color_scheme,
+    load_image,
 )
 
 # Module logger
@@ -72,7 +72,9 @@ class DisplayReader:
                 - raw_text: Raw OCR text
                 - confidence: OCR confidence score
         """
-        _logger.debug("Reading display", display_type=display_type, has_region=region is not None)
+        _logger.debug(
+            "Reading display", display_type=display_type, has_region=region is not None
+        )
         img = load_image(image)
 
         if region:
@@ -108,7 +110,9 @@ class DisplayReader:
             "raw_text": raw_text,
             "confidence": round(confidence, 3),
         }
-        _logger.debug("Display read complete", value=value, confidence=round(confidence, 3))
+        _logger.debug(
+            "Display read complete", value=value, confidence=round(confidence, 3)
+        )
         return result
 
     def read_multi_digit(
@@ -211,7 +215,9 @@ class DisplayReader:
             _, combined = cv2.threshold(combined, 127, 255, cv2.THRESH_BINARY)
 
         # Scale up
-        combined = cv2.resize(combined, None, fx=3, fy=3, interpolation=cv2.INTER_NEAREST)
+        combined = cv2.resize(
+            combined, None, fx=3, fy=3, interpolation=cv2.INTER_NEAREST
+        )
 
         # Clean up
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
@@ -257,7 +263,9 @@ class DisplayReader:
                 return self._preprocess_led(image)
 
         # Check background brightness
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        gray = (
+            cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        )
         mean_brightness = gray.mean()
 
         if mean_brightness < 80:
@@ -286,6 +294,7 @@ class DisplayReader:
         except ValueError:
             # Try to extract just the numeric parts
             import re
+
             match = re.search(r"-?\d+\.?\d*", text)
             if match:
                 try:

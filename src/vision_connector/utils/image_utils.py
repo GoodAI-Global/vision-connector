@@ -6,7 +6,7 @@ All functions work headless - no display required.
 """
 
 from pathlib import Path
-from typing import Dict, Tuple, Union, TypedDict
+from typing import Dict, Tuple, TypedDict, Union
 
 import cv2
 import numpy as np
@@ -15,6 +15,7 @@ from PIL import Image
 
 class Region(TypedDict):
     """Type definition for a region of interest (ROI)."""
+
     x: int
     y: int
     w: int
@@ -58,7 +59,9 @@ def load_image(source: Union[str, Path, np.ndarray, Image.Image]) -> np.ndarray:
 
     img = cv2.imread(str(path))
     if img is None:
-        raise ValueError(f"Failed to load image: {path}. File may be corrupted or unsupported format.")
+        raise ValueError(
+            f"Failed to load image: {path}. File may be corrupted or unsupported format."
+        )
 
     return img
 
@@ -80,7 +83,9 @@ def validate_region(region: Dict, image_shape: Tuple[int, ...]) -> Region:
     required_keys = {"x", "y", "w", "h"}
     if not required_keys.issubset(region.keys()):
         missing = required_keys - set(region.keys())
-        raise ValueError(f"Region missing required keys: {missing}. Required: x, y, w, h")
+        raise ValueError(
+            f"Region missing required keys: {missing}. Required: x, y, w, h"
+        )
 
     x, y, w, h = int(region["x"]), int(region["y"]), int(region["w"]), int(region["h"])
 
@@ -118,7 +123,7 @@ def crop_region(image: np.ndarray, region: Dict) -> np.ndarray:
     """
     validated = validate_region(region, image.shape)
     x, y, w, h = validated["x"], validated["y"], validated["w"], validated["h"]
-    return image[y:y+h, x:x+w].copy()
+    return image[y : y + h, x : x + w].copy()
 
 
 def preprocess_for_ocr(
@@ -155,7 +160,9 @@ def preprocess_for_ocr(
 
     # Denoise
     if denoise:
-        gray = cv2.fastNlMeansDenoising(gray, None, h=10, templateWindowSize=7, searchWindowSize=21)
+        gray = cv2.fastNlMeansDenoising(
+            gray, None, h=10, templateWindowSize=7, searchWindowSize=21
+        )
 
     # Invert if needed (light text on dark background)
     if invert:
@@ -169,7 +176,7 @@ def preprocess_for_ocr(
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv2.THRESH_BINARY,
             blockSize=11,
-            C=2
+            C=2,
         )
 
     return gray
@@ -210,14 +217,14 @@ def enhance_contrast(image: np.ndarray) -> np.ndarray:
     if len(image.shape) == 3:
         # Convert to LAB color space for better contrast enhancement
         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
+        lum, a_ch, b_ch = cv2.split(lab)
 
         # Apply CLAHE to L channel
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
+        lum = clahe.apply(lum)
 
         # Merge back
-        lab = cv2.merge([l, a, b])
+        lab = cv2.merge([lum, a_ch, b_ch])
         return cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
     else:
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))

@@ -63,8 +63,7 @@ class TestOCRExtractText:
         """Test extracting text from a specific region."""
         img = create_text_image("12345", size=(300, 100))
         text = ocr_processor.extract_text(
-            img,
-            region={"x": 0, "y": 0, "w": 150, "h": 50}
+            img, region={"x": 0, "y": 0, "w": 150, "h": 50}
         )
 
         assert isinstance(text, str)

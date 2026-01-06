@@ -12,13 +12,13 @@ import numpy as np
 import pytesseract
 from PIL import Image
 
-from vision_connector.logging import get_logger
 from vision_connector.exceptions import TesseractNotFoundError
+from vision_connector.logging import get_logger
 from vision_connector.utils.image_utils import (
-    load_image,
     crop_region,
-    preprocess_for_ocr,
     detect_text_color_scheme,
+    load_image,
+    preprocess_for_ocr,
 )
 
 # Module logger
@@ -40,8 +40,8 @@ class OCRProcessor:
 
     # Tesseract Page Segmentation Modes (PSM)
     PSM_SINGLE_BLOCK = 6  # Assume a single uniform block of text
-    PSM_SINGLE_LINE = 7   # Treat the image as a single text line
-    PSM_SINGLE_WORD = 8   # Treat the image as a single word
+    PSM_SINGLE_LINE = 7  # Treat the image as a single text line
+    PSM_SINGLE_WORD = 8  # Treat the image as a single word
     PSM_SPARSE_TEXT = 11  # Sparse text. Find as much text as possible
 
     def __init__(
@@ -274,16 +274,18 @@ class OCRProcessor:
 
             # Skip empty text and low confidence
             if text and conf > 0:
-                results.append({
-                    "text": text,
-                    "confidence": conf / 100.0,  # Normalize to 0-1
-                    "bbox": {
-                        "x": data["left"][i],
-                        "y": data["top"][i],
-                        "w": data["width"][i],
-                        "h": data["height"][i],
-                    },
-                })
+                results.append(
+                    {
+                        "text": text,
+                        "confidence": conf / 100.0,  # Normalize to 0-1
+                        "bbox": {
+                            "x": data["left"][i],
+                            "y": data["top"][i],
+                            "w": data["width"][i],
+                            "h": data["height"][i],
+                        },
+                    }
+                )
 
         return results
 

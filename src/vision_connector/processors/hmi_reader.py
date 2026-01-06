@@ -14,10 +14,14 @@ from typing import Any, Dict, Optional, Union
 import numpy as np
 from PIL import Image
 
+from vision_connector.exceptions import (
+    ImageProcessingError,
+    NoDisplayError,
+    RegionError,
+)
 from vision_connector.logging import get_logger
 from vision_connector.processors.ocr import OCRProcessor
 from vision_connector.utils.image_utils import load_image
-from vision_connector.exceptions import RegionError, NoDisplayError, ImageProcessingError
 
 # Module logger
 _logger = get_logger(__name__)
@@ -142,7 +146,9 @@ class HMIReader:
                 )
 
             # Log image source
-            image_source = str(image) if isinstance(image, (str, Path)) else type(image).__name__
+            image_source = (
+                str(image) if isinstance(image, (str, Path)) else type(image).__name__
+            )
             _logger.debug(
                 "Reading HMI image",
                 source=image_source,
@@ -311,7 +317,7 @@ class HMIReader:
             raise ImageProcessingError(
                 "OpenCV not available for GUI operations.",
                 original_error=e,
-            )
+            ) from e
 
         img = load_image(image)
 

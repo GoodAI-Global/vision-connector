@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 
 from vision_connector.logging import get_logger
-from vision_connector.utils.image_utils import load_image, crop_region
+from vision_connector.utils.image_utils import crop_region, load_image
 
 # Module logger
 _logger = get_logger(__name__)
@@ -145,7 +145,9 @@ class GaugeReader:
         Returns:
             Tuple of (center, radius) or (None, None) if not found.
         """
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        gray = (
+            cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        )
 
         # Apply blur to reduce noise
         blurred = cv2.GaussianBlur(gray, (9, 9), 2)
@@ -199,7 +201,9 @@ class GaugeReader:
             Tuple of (angle in degrees, confidence).
             Angle is measured from right (0°), clockwise.
         """
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        gray = (
+            cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+        )
 
         # Create mask for the gauge area
         mask = np.zeros(gray.shape, dtype=np.uint8)
@@ -254,11 +258,13 @@ class GaugeReader:
                 # Normalize angle to 0-360
                 angle_deg = angle_deg % 360
 
-                needle_candidates.append({
-                    "angle": angle_deg,
-                    "length": length,
-                    "tip": tip,
-                })
+                needle_candidates.append(
+                    {
+                        "angle": angle_deg,
+                        "length": length,
+                        "tip": tip,
+                    }
+                )
 
         if not needle_candidates:
             return None, 0.0

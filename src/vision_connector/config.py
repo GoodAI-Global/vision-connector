@@ -13,8 +13,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
-from vision_connector.logging import get_logger
 from vision_connector.exceptions import ConfigurationError
+from vision_connector.logging import get_logger
 
 _logger = get_logger(__name__)
 
@@ -23,6 +23,7 @@ _yaml_available = False
 
 try:
     import yaml
+
     _yaml_available = True
 except ImportError:
     pass
@@ -138,7 +139,7 @@ class Config:
                 continue
 
             # Remove prefix and convert to config key
-            config_key = key[len(prefix):].lower()
+            config_key = key[len(prefix) :].lower()
 
             # Handle nested keys (double underscore)
             if separator in config_key:
@@ -196,7 +197,11 @@ class Config:
         result = base.copy()
 
         for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            if (
+                key in result
+                and isinstance(result[key], dict)
+                and isinstance(value, dict)
+            ):
                 result[key] = self._merge_dicts(result[key], value)
             else:
                 result[key] = value
@@ -325,9 +330,13 @@ class Config:
             # Check min/max for numbers
             if value is not None and isinstance(value, (int, float)):
                 if "min" in rules and value < rules["min"]:
-                    errors.append(f"Value for {key} below minimum: {value} < {rules['min']}")
+                    errors.append(
+                        f"Value for {key} below minimum: {value} < {rules['min']}"
+                    )
                 if "max" in rules and value > rules["max"]:
-                    errors.append(f"Value for {key} above maximum: {value} > {rules['max']}")
+                    errors.append(
+                        f"Value for {key} above maximum: {value} > {rules['max']}"
+                    )
 
         if errors:
             _logger.warning("Configuration validation failed", errors=errors)

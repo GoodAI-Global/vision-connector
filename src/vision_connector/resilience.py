@@ -16,16 +16,17 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Optional, Tuple, Type
 
-from vision_connector.logging import get_logger
 from vision_connector.exceptions import RetryExhaustedError
+from vision_connector.logging import get_logger
 
 _logger = get_logger(__name__)
 
 
 class CircuitState(Enum):
     """Circuit breaker states."""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failing, reject calls
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failing, reject calls
     HALF_OPEN = "half_open"  # Testing if recovered
 
 
@@ -62,12 +63,13 @@ class RetryConfig:
             Delay in seconds.
         """
         delay = min(
-            self.base_delay * (self.exponential_base ** attempt),
+            self.base_delay * (self.exponential_base**attempt),
             self.max_delay,
         )
 
         if self.jitter:
             import random
+
             delay = delay * (0.5 + random.random())
 
         return delay
@@ -163,6 +165,7 @@ class CircuitBreakerState:
 
 class CircuitBreakerOpen(Exception):
     """Raised when circuit breaker is open and rejecting calls."""
+
     pass
 
 
@@ -236,6 +239,7 @@ def retry(
             )
 
         return wrapper
+
     return decorator
 
 
@@ -297,9 +301,11 @@ class CircuitBreaker:
 
     def __call__(self, func: Callable) -> Callable:
         """Decorator to wrap function with circuit breaker."""
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             return self.execute(func, *args, **kwargs)
+
         return wrapper
 
     def execute(self, func: Callable, *args, **kwargs) -> Any:
@@ -327,7 +333,7 @@ class CircuitBreaker:
             result = func(*args, **kwargs)
             self._state.record_success(self.config)
             return result
-        except Exception as e:
+        except Exception:
             self._state.record_failure(self.config)
             raise
 
@@ -359,6 +365,7 @@ def with_timeout(
         ... def slow_operation():
         ...     return heavy_computation()
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -377,9 +384,7 @@ def with_timeout(
             thread.join(timeout=seconds)
 
             if thread.is_alive():
-                _logger.warning(
-                    f"Operation {func.__name__} timed out after {seconds}s"
-                )
+                _logger.warning(f"Operation {func.__name__} timed out after {seconds}s")
                 if fallback:
                     return fallback()
                 raise TimeoutError(
@@ -392,6 +397,7 @@ def with_timeout(
             return result[0]
 
         return wrapper
+
     return decorator
 
 
@@ -407,6 +413,7 @@ def with_fallback(fallback_func: Callable[[], Any]):
         ... def get_status():
         ...     return api.get("/status")
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -420,4 +427,5 @@ def with_fallback(fallback_func: Callable[[], Any]):
                 return fallback_func()
 
         return wrapper
+
     return decorator

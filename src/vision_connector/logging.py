@@ -21,7 +21,9 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional, Union
 
 # Context variable for request/operation tracking
-_request_context: ContextVar[Dict[str, Any]] = ContextVar("request_context", default={})
+_request_context: ContextVar[Optional[Dict[str, Any]]] = ContextVar(
+    "request_context", default=None
+)
 
 
 class StructuredFormatter(logging.Formatter):
@@ -98,10 +100,10 @@ class StandardFormatter(logging.Formatter):
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
     COLORS = {
-        "DEBUG": "\033[36m",     # Cyan
-        "INFO": "\033[32m",      # Green
-        "WARNING": "\033[33m",   # Yellow
-        "ERROR": "\033[31m",     # Red
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
         "CRITICAL": "\033[35m",  # Magenta
     }
     RESET = "\033[0m"
@@ -304,7 +306,8 @@ class OperationContext:
         self.start_time = time.perf_counter()
 
         # Set context for nested logging
-        ctx = _request_context.get().copy()
+        existing = _request_context.get()
+        ctx = existing.copy() if existing else {}
         ctx["operation_id"] = self.operation_id
         ctx["operation"] = self.operation_name
         _request_context.set(ctx)
@@ -333,7 +336,8 @@ class OperationContext:
             )
 
         # Clear operation from context
-        ctx = _request_context.get().copy()
+        existing = _request_context.get()
+        ctx = existing.copy() if existing else {}
         ctx.pop("operation_id", None)
         ctx.pop("operation", None)
         _request_context.set(ctx)
@@ -350,7 +354,8 @@ def set_context(**kwargs: Any) -> None:
         >>> set_context(request_id="abc123", user="operator1")
         >>> logger.info("Processing request")  # Includes context
     """
-    ctx = _request_context.get().copy()
+    existing = _request_context.get()
+    ctx = existing.copy() if existing else {}
     ctx.update(kwargs)
     _request_context.set(ctx)
 

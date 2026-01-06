@@ -8,8 +8,7 @@ from pathlib import Path
 import pytest
 
 from vision_connector import HMIReader
-from vision_connector.exceptions import RegionError, NoDisplayError
-
+from vision_connector.exceptions import NoDisplayError, RegionError
 
 # Get project root for sample files
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -44,11 +43,7 @@ class TestHMIReaderBasic:
 
     def test_reader_with_config_dict(self):
         """Test reader initialization with config dictionary."""
-        config = {
-            "regions": {
-                "test_field": {"x": 0, "y": 0, "w": 100, "h": 50}
-            }
-        }
+        config = {"regions": {"test_field": {"x": 0, "y": 0, "w": 100, "h": 50}}}
         reader = HMIReader(config=config)
         assert "test_field" in reader.default_regions
 
@@ -61,10 +56,7 @@ class TestHMIReaderBasic:
 class TestHMIReaderReadImage:
     """Tests for read_image functionality."""
 
-    @pytest.mark.skipif(
-        not SAMPLE_IMAGE.exists(),
-        reason="Sample image not found"
-    )
+    @pytest.mark.skipif(not SAMPLE_IMAGE.exists(), reason="Sample image not found")
     def test_read_image_with_regions(self, hmi_reader):
         """Test reading image with inline region definitions."""
         regions = {
@@ -77,7 +69,7 @@ class TestHMIReaderReadImage:
 
     @pytest.mark.skipif(
         not SAMPLE_IMAGE.exists() or not SAMPLE_CONFIG.exists(),
-        reason="Sample files not found"
+        reason="Sample files not found",
     )
     def test_read_image_with_config(self, hmi_reader_with_config):
         """Test reading image using config file regions."""
@@ -97,18 +89,14 @@ class TestHMIReaderReadImage:
         """Test that nonexistent image raises FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
             hmi_reader.read_image(
-                "nonexistent.png",
-                regions={"test": {"x": 0, "y": 0, "w": 10, "h": 10}}
+                "nonexistent.png", regions={"test": {"x": 0, "y": 0, "w": 10, "h": 10}}
             )
 
 
 class TestHMIReaderMetadata:
     """Tests for metadata functionality."""
 
-    @pytest.mark.skipif(
-        not SAMPLE_IMAGE.exists(),
-        reason="Sample image not found"
-    )
+    @pytest.mark.skipif(not SAMPLE_IMAGE.exists(), reason="Sample image not found")
     def test_read_image_with_metadata(self, hmi_reader):
         """Test reading with confidence metadata."""
         regions = {
@@ -128,13 +116,11 @@ class TestHMIReaderConfig:
 
     def test_config_loading_from_json(self):
         """Test that JSON config loads correctly."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             config = {
                 "regions": {
                     "field1": {"x": 10, "y": 20, "w": 30, "h": 40},
-                    "field2": {"x": 50, "y": 60, "w": 70, "h": 80}
+                    "field2": {"x": 50, "y": 60, "w": 70, "h": 80},
                 }
             }
             json.dump(config, f)

@@ -5,26 +5,21 @@ Tests for the custom exception hierarchy.
 import pytest
 
 from vision_connector.exceptions import (
-    VisionConnectorError,
-    ImageProcessingError,
+    ConfigurationError,
     ImageLoadError,
+    ImageProcessingError,
+    LowConfidenceError,
+    MQTTError,
+    NoDisplayError,
+    OCRError,
+    OutputError,
     RegionError,
     RegionOutOfBoundsError,
-    OCRError,
-    TesseractNotFoundError,
-    OCRExtractionError,
-    LowConfidenceError,
-    GaugeReadingError,
-    GaugeDetectionError,
-    NeedleDetectionError,
-    OutputError,
-    MQTTError,
-    WebhookError,
     RetryExhaustedError,
-    ConfigurationError,
+    TesseractNotFoundError,
     ValidationError,
-    CalibrationError,
-    NoDisplayError,
+    VisionConnectorError,
+    WebhookError,
 )
 
 

@@ -14,8 +14,8 @@ from typing import Any, Callable, Dict, Optional
 
 import paho.mqtt.client as mqtt
 
-from vision_connector.logging import get_logger
 from vision_connector.exceptions import MQTTError, ValidationError
+from vision_connector.logging import get_logger
 
 # Module logger
 _logger = get_logger(__name__)
@@ -106,7 +106,9 @@ class MQTTOutput:
         self.tls_insecure = tls_insecure
 
         # Create client with unique ID
-        self.client_id = client_id or f"vision-connector-{int(time.time() * 1000) % 1000000}"
+        self.client_id = (
+            client_id or f"vision-connector-{int(time.time() * 1000) % 1000000}"
+        )
 
         # Use callback API version for paho-mqtt 2.x compatibility
         try:

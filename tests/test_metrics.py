@@ -2,15 +2,16 @@
 Tests for the Prometheus metrics infrastructure.
 """
 
-import pytest
 import time
 
+import pytest
+
 from vision_connector.metrics import (
-    VisionMetrics,
     MetricsStub,
-    track_operation,
-    track_duration,
+    VisionMetrics,
     metrics,
+    track_duration,
+    track_operation,
 )
 
 
@@ -61,18 +62,18 @@ class TestVisionMetrics:
 
     def test_metrics_has_expected_attributes(self):
         """Test metrics has expected counter/histogram attributes."""
-        assert hasattr(metrics, 'ocr_operations')
-        assert hasattr(metrics, 'gauge_readings')
-        assert hasattr(metrics, 'hmi_readings')
-        assert hasattr(metrics, 'errors')
-        assert hasattr(metrics, 'processing_duration')
-        assert hasattr(metrics, 'ocr_duration')
-        assert hasattr(metrics, 'ocr_confidence')
-        assert hasattr(metrics, 'mqtt_messages')
-        assert hasattr(metrics, 'webhook_requests')
-        assert hasattr(metrics, 'csv_rows')
-        assert hasattr(metrics, 'active_connections')
-        assert hasattr(metrics, 'info')
+        assert hasattr(metrics, "ocr_operations")
+        assert hasattr(metrics, "gauge_readings")
+        assert hasattr(metrics, "hmi_readings")
+        assert hasattr(metrics, "errors")
+        assert hasattr(metrics, "processing_duration")
+        assert hasattr(metrics, "ocr_duration")
+        assert hasattr(metrics, "ocr_confidence")
+        assert hasattr(metrics, "mqtt_messages")
+        assert hasattr(metrics, "webhook_requests")
+        assert hasattr(metrics, "csv_rows")
+        assert hasattr(metrics, "active_connections")
+        assert hasattr(metrics, "info")
 
     def test_get_metrics_returns_bytes(self):
         """Test get_metrics returns bytes."""

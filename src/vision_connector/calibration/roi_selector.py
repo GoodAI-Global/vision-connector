@@ -170,7 +170,9 @@ class ROISelector:
 
             # Select ROI
             print(f"Select region for '{name}' in the image window...")
-            roi = cv2.selectROI(window_name, self._image, fromCenter=False, showCrosshair=True)
+            roi = cv2.selectROI(
+                window_name, self._image, fromCenter=False, showCrosshair=True
+            )
 
             x, y, w, h = roi
 
@@ -179,14 +181,18 @@ class ROISelector:
                 continue
 
             # Get region type
-            region_type = input("Region type (number/text/auto) [auto]: ").strip().lower()
+            region_type = (
+                input("Region type (number/text/auto) [auto]: ").strip().lower()
+            )
             if region_type not in ("number", "text", "auto", ""):
                 region_type = "auto"
             if not region_type:
                 region_type = "auto"
 
             self.add_region(name, int(x), int(y), int(w), int(h), region_type)
-            print(f"Added region '{name}': x={x}, y={y}, w={w}, h={h}, type={region_type}")
+            print(
+                f"Added region '{name}': x={x}, y={y}, w={w}, h={h}, type={region_type}"
+            )
 
         cv2.destroyWindow(window_name)
 
@@ -312,7 +318,9 @@ class ROISelector:
             x, y, w, h = region["x"], region["y"], region["w"], region["h"]
 
             if x < 0 or y < 0:
-                errors.append(f"Region '{name}': Position cannot be negative (x={x}, y={y})")
+                errors.append(
+                    f"Region '{name}': Position cannot be negative (x={x}, y={y})"
+                )
 
             if x + w > width:
                 errors.append(
@@ -348,9 +356,9 @@ class ROISelector:
         img = load_image(image).copy()
 
         colors = [
-            (0, 255, 0),    # Green
-            (255, 0, 0),    # Blue
-            (0, 0, 255),    # Red
+            (0, 255, 0),  # Green
+            (255, 0, 0),  # Blue
+            (0, 0, 255),  # Red
             (255, 255, 0),  # Cyan
             (255, 0, 255),  # Magenta
             (0, 255, 255),  # Yellow
@@ -369,7 +377,9 @@ class ROISelector:
             font_scale = 0.5
             thickness = 1
 
-            (label_w, label_h), baseline = cv2.getTextSize(label, font, font_scale, thickness)
+            (label_w, label_h), baseline = cv2.getTextSize(
+                label, font, font_scale, thickness
+            )
 
             # Draw label background
             cv2.rectangle(

@@ -13,8 +13,8 @@ from urllib.parse import urlparse
 
 import requests
 
-from vision_connector.logging import get_logger
 from vision_connector.exceptions import ValidationError
+from vision_connector.logging import get_logger
 
 # Module logger
 _logger = get_logger(__name__)
@@ -114,7 +114,11 @@ class WebhookOutput:
             raise ValidationError(
                 f"Invalid URL scheme: {parsed.scheme}. "
                 f"Allowed: {', '.join(self.ALLOWED_SCHEMES)}",
-                details={"url": url, "scheme": parsed.scheme, "allowed": list(self.ALLOWED_SCHEMES)},
+                details={
+                    "url": url,
+                    "scheme": parsed.scheme,
+                    "allowed": list(self.ALLOWED_SCHEMES),
+                },
             )
 
         if not parsed.netloc:

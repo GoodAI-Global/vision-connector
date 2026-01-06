@@ -4,19 +4,19 @@ Tests for the structured logging infrastructure.
 
 import json
 import logging
-import pytest
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from vision_connector.logging import (
-    VisionLogger,
-    StructuredFormatter,
     StandardFormatter,
-    OperationContext,
-    get_logger,
-    set_context,
+    StructuredFormatter,
+    VisionLogger,
     clear_context,
+    get_logger,
     log_performance,
+    set_context,
 )
 
 

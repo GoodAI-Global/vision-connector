@@ -7,7 +7,6 @@ import pytest
 
 from vision_connector import GaugeReader
 
-
 # Get project root for sample files
 PROJECT_ROOT = Path(__file__).parent.parent
 SAMPLE_GAUGE = PROJECT_ROOT / "sample_images" / "analog_gauge.png"
@@ -39,16 +38,12 @@ class TestGaugeReaderReadGauge:
     """Tests for read_analog_gauge functionality."""
 
     @pytest.mark.skipif(
-        not SAMPLE_GAUGE.exists(),
-        reason="Sample gauge image not found"
+        not SAMPLE_GAUGE.exists(), reason="Sample gauge image not found"
     )
     def test_read_analog_gauge(self, gauge_reader):
         """Test reading an analog gauge image."""
         result = gauge_reader.read_analog_gauge(
-            SAMPLE_GAUGE,
-            min_value=0,
-            max_value=100,
-            unit="PSI"
+            SAMPLE_GAUGE, min_value=0, max_value=100, unit="PSI"
         )
 
         assert isinstance(result, dict)
@@ -61,16 +56,12 @@ class TestGaugeReaderReadGauge:
         assert result["unit"] == "PSI"
 
     @pytest.mark.skipif(
-        not SAMPLE_GAUGE.exists(),
-        reason="Sample gauge image not found"
+        not SAMPLE_GAUGE.exists(), reason="Sample gauge image not found"
     )
     def test_read_gauge_returns_reasonable_value(self, gauge_reader):
         """Test that gauge reading returns value in expected range."""
         result = gauge_reader.read_analog_gauge(
-            SAMPLE_GAUGE,
-            min_value=0,
-            max_value=100,
-            unit="PSI"
+            SAMPLE_GAUGE, min_value=0, max_value=100, unit="PSI"
         )
 
         if result["value"] is not None:
@@ -85,10 +76,7 @@ class TestGaugeReaderReadGauge:
         img = np.ones((200, 200, 3), dtype=np.uint8) * 200
 
         result = gauge_reader.read_analog_gauge(
-            img,
-            min_value=0,
-            max_value=100,
-            unit="TEST"
+            img, min_value=0, max_value=100, unit="TEST"
         )
 
         # Should return a result dict (may not find a valid reading)
@@ -127,16 +115,12 @@ class TestGaugeReaderCalibration:
     """Tests for calibration functionality."""
 
     @pytest.mark.skipif(
-        not SAMPLE_GAUGE.exists(),
-        reason="Sample gauge image not found"
+        not SAMPLE_GAUGE.exists(), reason="Sample gauge image not found"
     )
     def test_calibration(self, gauge_reader):
         """Test gauge calibration."""
         result = gauge_reader.calibrate(
-            SAMPLE_GAUGE,
-            known_value=67.5,
-            min_value=0,
-            max_value=100
+            SAMPLE_GAUGE, known_value=67.5, min_value=0, max_value=100
         )
 
         assert isinstance(result, dict)
